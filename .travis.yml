@@ -1,5 +1,10 @@
 language: go
 
+go:
+  - 1.1
+  - 1.2
+  - tip
+
 script:
-  - go get github.com/mcuadros/go-defaults
+  - go get launchpad.net/gocheck
   - go test

@@ -70,3 +70,21 @@ func (self *DefaultsSuite) assertTypes(c *C, foo *ExampleBasic) {
 	c.Assert(foo.Float64, Equals, 6.4)
 	c.Assert(foo.Struct.Bool, Equals, true)
 }
+
+func (self *DefaultsSuite) TestSetDefaultsWithValues(c *C) {
+	foo := &ExampleBasic{
+		Integer:  55,
+		UInteger: 22,
+		Float32:  9.9,
+		String:   "bar",
+		Bytes:    []byte("foo"),
+	}
+
+	SetDefaults(foo)
+
+	c.Assert(foo.Integer, Equals, 55)
+	c.Assert(foo.UInteger, Equals, uint(22))
+	c.Assert(foo.Float32, Equals, float32(9.9))
+	c.Assert(foo.String, Equals, "bar")
+	c.Assert(string(foo.Bytes), Equals, "foo")
+}
