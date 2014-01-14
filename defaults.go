@@ -10,6 +10,18 @@ type Field struct {
 	Value reflect.Value
 }
 
+// Apply the default values to the struct object, the struct type must have
+// the StructTag with name "default" and the directed value.
+//
+// Usage
+//     type ExampleBasic struct {
+//         Foo bool   `default:"true"`
+//         Bar string `default:"33"`
+//         Qux int8
+//     }
+//
+//      foo := &ExampleBasic{}
+//      SetDefaults(foo)
 func SetDefaults(variable interface{}) {
 	fields := getFields(variable)
 	setDefaultValues(fields)

@@ -1,1 +1,5 @@
 language: go
+
+script:
+  - go get github.com/mcuadros/go-defaults
+  - go test

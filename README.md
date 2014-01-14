@@ -27,14 +27,14 @@ import "github.com/mcuadros/go-defaults"
 import "fmt"
 
 type ExampleBasic struct {
-    Foo bool   `default:"true"`
+    Foo bool   `default:"true"` //<-- StructTag with a default key
     Bar string `default:"33"`
     Qux int8
 }
 
 func NewExampleBasic() *ExampleBasic {
     example := new(ExampleBasic)
-    SetDefaults(example)
+    SetDefaults(example) //<-- This set the defaults values
 
     return example
 }
