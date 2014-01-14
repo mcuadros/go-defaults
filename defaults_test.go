@@ -88,3 +88,10 @@ func (self *DefaultsSuite) TestSetDefaultsWithValues(c *C) {
 	c.Assert(foo.String, Equals, "bar")
 	c.Assert(string(foo.Bytes), Equals, "foo")
 }
+
+func (self *DefaultsSuite) BenchmarkLogic(c *C) {
+	for i := 0; i < c.N; i++ {
+		foo := &ExampleBasic{}
+		SetDefaults(foo)
+	}
+}
