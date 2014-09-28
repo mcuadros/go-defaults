@@ -5,11 +5,6 @@ import (
 	"strconv"
 )
 
-type fieldData struct {
-	Field reflect.StructField
-	Value reflect.Value
-}
-
 // Applies the default values to the struct object, the struct type must have
 // the StructTag with name "default" and the directed value.
 //
@@ -23,118 +18,71 @@ type fieldData struct {
 //      foo := &ExampleBasic{}
 //      SetDefaults(foo)
 func SetDefaults(variable interface{}) {
-	fields := getFields(variable)
-	setDefaultValues(fields)
+	getDefaultFiller().Fill(variable)
 }
 
-func getFields(variable interface{}) []*fieldData {
-	valueObject := reflect.ValueOf(variable).Elem()
+var defaultFiller *Filler = nil
 
-	return getFieldsFromValue(valueObject)
+func getDefaultFiller() *Filler {
+	if defaultFiller == nil {
+		defaultFiller = newDefaultFiller()
+	}
+
+	return defaultFiller
 }
 
-func getFieldsFromValue(valueObject reflect.Value) []*fieldData {
-	typeObject := valueObject.Type()
+func newDefaultFiller() *Filler {
+	funcs := make(map[reflect.Kind]fillerFunc, 0)
+	funcs[reflect.Bool] = func(field *fieldData, defaultValue string) {
+		value, _ := strconv.ParseBool(defaultValue)
+		field.Value.SetBool(value)
+	}
 
-	count := valueObject.NumField()
-	results := make([]*fieldData, 0)
-	for i := 0; i < count; i++ {
-		value := valueObject.Field(i)
-		field := typeObject.Field(i)
+	funcs[reflect.Int] = func(field *fieldData, defaultValue string) {
+		value, _ := strconv.ParseInt(defaultValue, 10, 64)
+		field.Value.SetInt(value)
+	}
 
-		if value.CanSet() {
-			results = append(results, &fieldData{
-				Value: value,
-				Field: field,
-			})
+	funcs[reflect.Int8] = funcs[reflect.Int]
+	funcs[reflect.Int16] = funcs[reflect.Int]
+	funcs[reflect.Int32] = funcs[reflect.Int]
+	funcs[reflect.Int64] = funcs[reflect.Int]
+
+	funcs[reflect.Float32] = func(field *fieldData, defaultValue string) {
+		value, _ := strconv.ParseFloat(defaultValue, 64)
+		field.Value.SetFloat(value)
+	}
+
+	funcs[reflect.Float64] = funcs[reflect.Float32]
+
+	funcs[reflect.Uint] = func(field *fieldData, defaultValue string) {
+		value, _ := strconv.ParseUint(defaultValue, 10, 64)
+		field.Value.SetUint(value)
+	}
+
+	funcs[reflect.Uint8] = funcs[reflect.Uint]
+	funcs[reflect.Uint16] = funcs[reflect.Uint]
+	funcs[reflect.Uint32] = funcs[reflect.Uint]
+	funcs[reflect.Uint64] = funcs[reflect.Uint]
+
+	funcs[reflect.String] = func(field *fieldData, defaultValue string) {
+		field.Value.SetString(defaultValue)
+	}
+
+	funcs[reflect.Slice] = func(field *fieldData, defaultValue string) {
+		if field.Value.Type().Elem().Kind() == reflect.Uint8 {
+			if field.Value.Bytes() != nil {
+				return
+			}
+
+			field.Value.SetBytes([]byte(defaultValue))
 		}
 	}
 
-	return results
-}
-
-func setDefaultValues(fields []*fieldData) {
-	for _, field := range fields {
-		setDefaultValue(field)
-	}
-}
-
-func setDefaultValue(field *fieldData) {
-	defaultValue := field.Field.Tag.Get("default")
-
-	switch field.Value.Kind() {
-	case reflect.Bool:
-		setDefaultValueToBool(field, defaultValue)
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		setDefaultValueToInt(field, defaultValue)
-	case reflect.Float32, reflect.Float64:
-		setDefaultValueToFloat(field, defaultValue)
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		setDefaultValueToUint(field, defaultValue)
-	case reflect.Slice:
-		setDefaultValueToSlice(field, defaultValue)
-	case reflect.String:
-		setDefaultValueToString(field, defaultValue)
-	case reflect.Struct:
-		setDefaultValueToStruct(field, defaultValue)
-	}
-}
-
-func setDefaultValueToBool(field *fieldData, defaultValue string) {
-	if field.Value.Bool() != false {
-		return
+	funcs[reflect.Struct] = func(field *fieldData, defaultValue string) {
+		fields := getDefaultFiller().getFieldsFromValue(field.Value)
+		getDefaultFiller().setDefaultValues(fields)
 	}
 
-	value, _ := strconv.ParseBool(defaultValue)
-	field.Value.SetBool(value)
-}
-
-func setDefaultValueToInt(field *fieldData, defaultValue string) {
-	if field.Value.Int() != 0 {
-		return
-	}
-
-	value, _ := strconv.ParseInt(defaultValue, 10, 64)
-	field.Value.SetInt(value)
-}
-
-func setDefaultValueToFloat(field *fieldData, defaultValue string) {
-	if field.Value.Float() != .0 {
-		return
-	}
-
-	value, _ := strconv.ParseFloat(defaultValue, 64)
-	field.Value.SetFloat(value)
-}
-
-func setDefaultValueToUint(field *fieldData, defaultValue string) {
-	if field.Value.Uint() != 0 {
-		return
-	}
-
-	value, _ := strconv.ParseUint(defaultValue, 10, 64)
-	field.Value.SetUint(value)
-}
-
-func setDefaultValueToSlice(field *fieldData, defaultValue string) {
-	if field.Value.Type().Elem().Kind() == reflect.Uint8 {
-		if field.Value.Bytes() != nil {
-			return
-		}
-
-		field.Value.SetBytes([]byte(defaultValue))
-	}
-}
-
-func setDefaultValueToString(field *fieldData, defaultValue string) {
-	if field.Value.String() != "" {
-		return
-	}
-
-	field.Value.SetString(defaultValue)
-}
-
-func setDefaultValueToStruct(field *fieldData, defaultValue string) {
-	fields := getFieldsFromValue(field.Value)
-	setDefaultValues(fields)
+	return &Filler{FuncByKind: funcs, Tag: "default"}
 }
