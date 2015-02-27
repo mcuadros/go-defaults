@@ -1,4 +1,4 @@
-go-defaults [![Build Status](https://travis-ci.org/mcuadros/go-defaults.png?branch=master)](https://travis-ci.org/mcuadros/go-defaults) [![GoDoc](http://godoc.org/github.com/mcuadros/go-defaults?status.png)](http://godoc.org/github.com/mcuadros/go-defaults)
+go-defaults [![Build Status](https://travis-ci.org/mcuadros/go-defaults.png?branch=master)](https://travis-ci.org/mcuadros/go-defaults) [![GoDoc](http://godoc.org/github.com/mcuadros/go-defaults?status.png)](http://godoc.org/github.com/mcuadros/go-defaults) [![GitHub release](https://img.shields.io/github/release/mcuadros/go-defaults.svg)](https://github.com/mcuadros/go-defaults/releases)
 ==============================
 
 This library allow to define a default value to any struct, this is made thanks to [struct tags](http://golang.org/pkg/reflect/#StructTag).
@@ -14,7 +14,7 @@ Installation
 The recommended way to install go-defaults
 
 ```
-go get github.com/mcuadros/go-defaults
+go get gopkg.in/mcuadros/go-defaults.v1
 ```
 
 Examples
@@ -23,8 +23,10 @@ Examples
 A basic example:
 
 ```go
-import "github.com/mcuadros/go-defaults"
-import "fmt"
+import (
+    "fmt"
+    "github.com/mcuadros/go-defaults"
+)
 
 type ExampleBasic struct {
     Foo bool   `default:"true"` //<-- StructTag with a default key
