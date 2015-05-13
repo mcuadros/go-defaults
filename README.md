@@ -36,7 +36,7 @@ type ExampleBasic struct {
 
 func NewExampleBasic() *ExampleBasic {
     example := new(ExampleBasic)
-    SetDefaults(example) //<-- This set the defaults values
+    defaults.SetDefaults(example) //<-- This set the defaults values
 
     return example
 }
