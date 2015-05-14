@@ -1,12 +1,7 @@
 go-defaults [![Build Status](https://travis-ci.org/mcuadros/go-defaults.png?branch=master)](https://travis-ci.org/mcuadros/go-defaults) [![GoDoc](http://godoc.org/github.com/mcuadros/go-defaults?status.png)](http://godoc.org/github.com/mcuadros/go-defaults) [![GitHub release](https://img.shields.io/github/release/mcuadros/go-defaults.svg)](https://github.com/mcuadros/go-defaults/releases)
 ==============================
 
-This library allow to define a default value to any struct, this is made thanks to [struct tags](http://golang.org/pkg/reflect/#StructTag).
-
-> A StructTag is the tag string in a struct field.
-
-> By convention, tag strings are a concatenation of optionally space-separated key:"value" pairs. Each key is a non-empty string consisting of non-control characters other than space (U+0020 ' '), quote (U+0022 '"'), and colon (U+003A ':'). Each value is quoted using U+0022 '"' characters and Go string literal syntax.
-
+Enabling stuctures with defaults values using [struct tags](http://golang.org/pkg/reflect/#StructTag).
 
 Installation
 ------------
