@@ -33,13 +33,13 @@ func getDefaultFiller() *Filler {
 
 func newDefaultFiller() *Filler {
 	funcs := make(map[reflect.Kind]fillerFunc, 0)
-	funcs[reflect.Bool] = func(field *fieldData, defaultValue string) {
-		value, _ := strconv.ParseBool(defaultValue)
+	funcs[reflect.Bool] = func(field *fieldData, tagValue string) {
+		value, _ := strconv.ParseBool(tagValue)
 		field.Value.SetBool(value)
 	}
 
-	funcs[reflect.Int] = func(field *fieldData, defaultValue string) {
-		value, _ := strconv.ParseInt(defaultValue, 10, 64)
+	funcs[reflect.Int] = func(field *fieldData, tagValue string) {
+		value, _ := strconv.ParseInt(tagValue, 10, 64)
 		field.Value.SetInt(value)
 	}
 
@@ -48,15 +48,15 @@ func newDefaultFiller() *Filler {
 	funcs[reflect.Int32] = funcs[reflect.Int]
 	funcs[reflect.Int64] = funcs[reflect.Int]
 
-	funcs[reflect.Float32] = func(field *fieldData, defaultValue string) {
-		value, _ := strconv.ParseFloat(defaultValue, 64)
+	funcs[reflect.Float32] = func(field *fieldData, tagValue string) {
+		value, _ := strconv.ParseFloat(tagValue, 64)
 		field.Value.SetFloat(value)
 	}
 
 	funcs[reflect.Float64] = funcs[reflect.Float32]
 
-	funcs[reflect.Uint] = func(field *fieldData, defaultValue string) {
-		value, _ := strconv.ParseUint(defaultValue, 10, 64)
+	funcs[reflect.Uint] = func(field *fieldData, tagValue string) {
+		value, _ := strconv.ParseUint(tagValue, 10, 64)
 		field.Value.SetUint(value)
 	}
 
@@ -65,21 +65,21 @@ func newDefaultFiller() *Filler {
 	funcs[reflect.Uint32] = funcs[reflect.Uint]
 	funcs[reflect.Uint64] = funcs[reflect.Uint]
 
-	funcs[reflect.String] = func(field *fieldData, defaultValue string) {
-		field.Value.SetString(defaultValue)
+	funcs[reflect.String] = func(field *fieldData, tagValue string) {
+		field.Value.SetString(tagValue)
 	}
 
-	funcs[reflect.Slice] = func(field *fieldData, defaultValue string) {
+	funcs[reflect.Slice] = func(field *fieldData, tagValue string) {
 		if field.Value.Type().Elem().Kind() == reflect.Uint8 {
 			if field.Value.Bytes() != nil {
 				return
 			}
 
-			field.Value.SetBytes([]byte(defaultValue))
+			field.Value.SetBytes([]byte(tagValue))
 		}
 	}
 
-	funcs[reflect.Struct] = func(field *fieldData, defaultValue string) {
+	funcs[reflect.Struct] = func(field *fieldData, tagValue string) {
 		fields := getDefaultFiller().getFieldsFromValue(field.Value)
 		getDefaultFiller().setDefaultValues(fields)
 	}

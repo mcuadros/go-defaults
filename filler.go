@@ -1,6 +1,7 @@
 package defaults
 
 import (
+	"fmt"
 	"reflect"
 )
 
@@ -12,7 +13,7 @@ type fieldData struct {
 type fillerFunc func(field *fieldData, config string)
 
 type Filler struct {
-	FuncByName map[string]fillerFunc
+	FuncByType map[TypeHash]fillerFunc
 	FuncByKind map[reflect.Kind]fillerFunc
 	Tag        string
 }
@@ -90,12 +91,27 @@ func (f *Filler) isEmpty(field *fieldData) bool {
 func (f *Filler) setDefaultValue(field *fieldData) {
 	tagValue := field.Field.Tag.Get(f.Tag)
 
-	function := f.getFunctionByKind(field.Field.Type.Kind())
-	if function == nil {
+	function := f.getFunctionByType(field.Field.Type)
+	if function != nil {
+		function(field, tagValue)
 		return
 	}
 
-	function(field, tagValue)
+	function = f.getFunctionByKind(field.Field.Type.Kind())
+	if function != nil {
+		function(field, tagValue)
+		return
+	}
+
+	return
+}
+
+func (f *Filler) getFunctionByType(t reflect.Type) fillerFunc {
+	if f, ok := f.FuncByType[GetTypeHash(t)]; ok == true {
+		return f
+	}
+
+	return nil
 }
 
 func (f *Filler) getFunctionByKind(k reflect.Kind) fillerFunc {
@@ -104,4 +120,14 @@ func (f *Filler) getFunctionByKind(k reflect.Kind) fillerFunc {
 	}
 
 	return nil
+}
+
+type TypeHash string
+
+func GetTypeHash(t reflect.Type) TypeHash {
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+
+	return TypeHash(fmt.Sprintf("%s.%s", t.PkgPath(), t.Name()))
 }
