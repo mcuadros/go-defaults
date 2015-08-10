@@ -17,18 +17,18 @@ type Filler struct {
 	Tag        string
 }
 
-func (self *Filler) Fill(variable interface{}) {
-	fields := self.getFields(variable)
-	self.setDefaultValues(fields)
+func (f *Filler) Fill(variable interface{}) {
+	fields := f.getFields(variable)
+	f.setDefaultValues(fields)
 }
 
-func (self *Filler) getFields(variable interface{}) []*fieldData {
+func (f *Filler) getFields(variable interface{}) []*fieldData {
 	valueObject := reflect.ValueOf(variable).Elem()
 
-	return self.getFieldsFromValue(valueObject)
+	return f.getFieldsFromValue(valueObject)
 }
 
-func (self *Filler) getFieldsFromValue(valueObject reflect.Value) []*fieldData {
+func (f *Filler) getFieldsFromValue(valueObject reflect.Value) []*fieldData {
 	typeObject := valueObject.Type()
 
 	count := valueObject.NumField()
@@ -48,15 +48,15 @@ func (self *Filler) getFieldsFromValue(valueObject reflect.Value) []*fieldData {
 	return results
 }
 
-func (self *Filler) setDefaultValues(fields []*fieldData) {
+func (f *Filler) setDefaultValues(fields []*fieldData) {
 	for _, field := range fields {
-		if self.isEmpty(field) {
-			self.setDefaultValue(field)
+		if f.isEmpty(field) {
+			f.setDefaultValue(field)
 		}
 	}
 }
 
-func (self *Filler) isEmpty(field *fieldData) bool {
+func (f *Filler) isEmpty(field *fieldData) bool {
 	switch field.Value.Kind() {
 	case reflect.Bool:
 		if field.Value.Bool() != false {
@@ -75,10 +75,8 @@ func (self *Filler) isEmpty(field *fieldData) bool {
 			return false
 		}
 	case reflect.Slice:
-		if field.Value.Type().Elem().Kind() == reflect.Uint8 {
-			if field.Value.Bytes() != nil {
-				return false
-			}
+		if field.Value.Len() != 0 {
+			return false
 		}
 	case reflect.String:
 		if field.Value.String() != "" {
@@ -89,10 +87,10 @@ func (self *Filler) isEmpty(field *fieldData) bool {
 	return true
 }
 
-func (self *Filler) setDefaultValue(field *fieldData) {
-	tagValue := field.Field.Tag.Get(self.Tag)
+func (f *Filler) setDefaultValue(field *fieldData) {
+	tagValue := field.Field.Tag.Get(f.Tag)
 
-	function := self.getFunctionByKind(field.Field.Type.Kind())
+	function := f.getFunctionByKind(field.Field.Type.Kind())
 	if function == nil {
 		return
 	}
@@ -100,8 +98,8 @@ func (self *Filler) setDefaultValue(field *fieldData) {
 	function(field, tagValue)
 }
 
-func (self *Filler) getFunctionByKind(k reflect.Kind) fillerFunc {
-	if f, ok := self.FuncByKind[k]; ok == true {
+func (f *Filler) getFunctionByKind(k reflect.Kind) fillerFunc {
+	if f, ok := f.FuncByKind[k]; ok == true {
 		return f
 	}
 

@@ -35,25 +35,25 @@ type ExampleBasic struct {
 	}
 }
 
-func (self *DefaultsSuite) TestSetDefaultsBasic(c *C) {
+func (s *DefaultsSuite) TestSetDefaultsBasic(c *C) {
 	foo := &ExampleBasic{}
 	SetDefaults(foo)
 
-	self.assertTypes(c, foo)
+	s.assertTypes(c, foo)
 }
 
 type ExampleNested struct {
 	Struct ExampleBasic
 }
 
-func (self *DefaultsSuite) TestSetDefaultsNested(c *C) {
+func (s *DefaultsSuite) TestSetDefaultsNested(c *C) {
 	foo := &ExampleNested{}
 	SetDefaults(foo)
 
-	self.assertTypes(c, &foo.Struct)
+	s.assertTypes(c, &foo.Struct)
 }
 
-func (self *DefaultsSuite) assertTypes(c *C, foo *ExampleBasic) {
+func (s *DefaultsSuite) assertTypes(c *C, foo *ExampleBasic) {
 	c.Assert(foo.Bool, Equals, true)
 	c.Assert(foo.Integer, Equals, 33)
 	c.Assert(foo.Integer8, Equals, int8(8))
@@ -72,7 +72,7 @@ func (self *DefaultsSuite) assertTypes(c *C, foo *ExampleBasic) {
 	c.Assert(foo.Struct.Bool, Equals, true)
 }
 
-func (self *DefaultsSuite) TestSetDefaultsWithValues(c *C) {
+func (s *DefaultsSuite) TestSetDefaultsWithValues(c *C) {
 	foo := &ExampleBasic{
 		Integer:  55,
 		UInteger: 22,
@@ -90,7 +90,7 @@ func (self *DefaultsSuite) TestSetDefaultsWithValues(c *C) {
 	c.Assert(string(foo.Bytes), Equals, "foo")
 }
 
-func (self *DefaultsSuite) BenchmarkLogic(c *C) {
+func (s *DefaultsSuite) BenchmarkLogic(c *C) {
 	for i := 0; i < c.N; i++ {
 		foo := &ExampleBasic{}
 		SetDefaults(foo)

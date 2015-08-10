@@ -6,14 +6,14 @@ type FactorySuite struct{}
 
 var _ = Suite(&FactorySuite{})
 
-func (self *FactorySuite) TestSetDefaultsBasic(c *C) {
+func (s *FactorySuite) TestSetDefaultsBasic(c *C) {
 	foo := &ExampleBasic{}
 	Factory(foo)
 
-	self.assertTypes(c, foo)
+	s.assertTypes(c, foo)
 }
 
-func (self *FactorySuite) assertTypes(c *C, foo *ExampleBasic) {
+func (s *FactorySuite) assertTypes(c *C, foo *ExampleBasic) {
 	c.Assert(foo.String, HasLen, 32)
 	c.Assert(foo.Integer, Not(Equals), 0)
 	c.Assert(foo.Integer8, Not(Equals), int8(0))
