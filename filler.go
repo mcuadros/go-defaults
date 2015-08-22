@@ -12,12 +12,17 @@ type fieldData struct {
 
 type fillerFunc func(field *fieldData, config string)
 
+// Filler contains all the functions to fill any struct field with any type
+// allowing to define function by Kind, Type of field name
 type Filler struct {
+	FuncByName map[string]fillerFunc
 	FuncByType map[TypeHash]fillerFunc
 	FuncByKind map[reflect.Kind]fillerFunc
 	Tag        string
 }
 
+// Fill apply all the functions contained on Filler, setting all the possible
+// values
 func (f *Filler) Fill(variable interface{}) {
 	fields := f.getFields(variable)
 	f.setDefaultValues(fields)
@@ -33,7 +38,7 @@ func (f *Filler) getFieldsFromValue(valueObject reflect.Value) []*fieldData {
 	typeObject := valueObject.Type()
 
 	count := valueObject.NumField()
-	results := make([]*fieldData, 0)
+	var results []*fieldData
 	for i := 0; i < count; i++ {
 		value := valueObject.Field(i)
 		field := typeObject.Field(i)
@@ -91,39 +96,52 @@ func (f *Filler) isEmpty(field *fieldData) bool {
 func (f *Filler) setDefaultValue(field *fieldData) {
 	tagValue := field.Field.Tag.Get(f.Tag)
 
-	function := f.getFunctionByType(field.Field.Type)
-	if function != nil {
-		function(field, tagValue)
-		return
+	getters := []func(field *fieldData) fillerFunc{
+		f.getFunctionByName,
+		f.getFunctionByType,
+		f.getFunctionByKind,
 	}
 
-	function = f.getFunctionByKind(field.Field.Type.Kind())
-	if function != nil {
-		function(field, tagValue)
-		return
+	for _, getter := range getters {
+		filler := getter(field)
+		if filler != nil {
+			filler(field, tagValue)
+			return
+		}
 	}
 
 	return
 }
 
-func (f *Filler) getFunctionByType(t reflect.Type) fillerFunc {
-	if f, ok := f.FuncByType[GetTypeHash(t)]; ok == true {
+func (f *Filler) getFunctionByName(field *fieldData) fillerFunc {
+	if f, ok := f.FuncByName[field.Field.Name]; ok == true {
 		return f
 	}
 
 	return nil
 }
 
-func (f *Filler) getFunctionByKind(k reflect.Kind) fillerFunc {
-	if f, ok := f.FuncByKind[k]; ok == true {
+func (f *Filler) getFunctionByType(field *fieldData) fillerFunc {
+	if f, ok := f.FuncByType[GetTypeHash(field.Field.Type)]; ok == true {
 		return f
 	}
 
 	return nil
 }
 
+func (f *Filler) getFunctionByKind(field *fieldData) fillerFunc {
+	if f, ok := f.FuncByKind[field.Field.Type.Kind()]; ok == true {
+		return f
+	}
+
+	return nil
+}
+
+// TypeHash is a string representing a reflect.Type following the next pattern:
+// <package.name>.<type.name>
 type TypeHash string
 
+// GetTypeHash returns the TypeHash for a given reflect.Type
 func GetTypeHash(t reflect.Type) TypeHash {
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
