@@ -6,11 +6,13 @@ import (
 )
 
 type fieldData struct {
-	Field reflect.StructField
-	Value reflect.Value
+	Field    reflect.StructField
+	Value    reflect.Value
+	TagValue string
+	Parent   *fieldData
 }
 
-type fillerFunc func(field *fieldData, config string)
+type fillerFunc func(field *fieldData)
 
 // Filler contains all the functions to fill any struct field with any type
 // allowing to define function by Kind, Type of field name
@@ -31,10 +33,10 @@ func (f *Filler) Fill(variable interface{}) {
 func (f *Filler) getFields(variable interface{}) []*fieldData {
 	valueObject := reflect.ValueOf(variable).Elem()
 
-	return f.getFieldsFromValue(valueObject)
+	return f.getFieldsFromValue(valueObject, nil)
 }
 
-func (f *Filler) getFieldsFromValue(valueObject reflect.Value) []*fieldData {
+func (f *Filler) getFieldsFromValue(valueObject reflect.Value, parent *fieldData) []*fieldData {
 	typeObject := valueObject.Type()
 
 	count := valueObject.NumField()
@@ -45,8 +47,10 @@ func (f *Filler) getFieldsFromValue(valueObject reflect.Value) []*fieldData {
 
 		if value.CanSet() {
 			results = append(results, &fieldData{
-				Value: value,
-				Field: field,
+				Value:    value,
+				Field:    field,
+				TagValue: field.Tag.Get(f.Tag),
+				Parent:   parent,
 			})
 		}
 	}
@@ -94,8 +98,6 @@ func (f *Filler) isEmpty(field *fieldData) bool {
 }
 
 func (f *Filler) setDefaultValue(field *fieldData) {
-	tagValue := field.Field.Tag.Get(f.Tag)
-
 	getters := []func(field *fieldData) fillerFunc{
 		f.getFunctionByName,
 		f.getFunctionByType,
@@ -105,7 +107,7 @@ func (f *Filler) setDefaultValue(field *fieldData) {
 	for _, getter := range getters {
 		filler := getter(field)
 		if filler != nil {
-			filler(field, tagValue)
+			filler(field)
 			return
 		}
 	}

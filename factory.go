@@ -27,7 +27,7 @@ func newFactoryFiller() *Filler {
 
 	funcs := make(map[reflect.Kind]fillerFunc, 0)
 
-	funcs[reflect.Bool] = func(field *fieldData, _ string) {
+	funcs[reflect.Bool] = func(field *fieldData) {
 		if rand.Intn(1) == 1 {
 			field.Value.SetBool(true)
 		} else {
@@ -35,7 +35,7 @@ func newFactoryFiller() *Filler {
 		}
 	}
 
-	funcs[reflect.Int] = func(field *fieldData, _ string) {
+	funcs[reflect.Int] = func(field *fieldData) {
 		field.Value.SetInt(int64(rand.Int()))
 	}
 
@@ -44,13 +44,13 @@ func newFactoryFiller() *Filler {
 	funcs[reflect.Int32] = funcs[reflect.Int]
 	funcs[reflect.Int64] = funcs[reflect.Int]
 
-	funcs[reflect.Float32] = func(field *fieldData, tagValue string) {
+	funcs[reflect.Float32] = func(field *fieldData) {
 		field.Value.SetFloat(rand.Float64())
 	}
 
 	funcs[reflect.Float64] = funcs[reflect.Float32]
 
-	funcs[reflect.Uint] = func(field *fieldData, tagValue string) {
+	funcs[reflect.Uint] = func(field *fieldData) {
 		field.Value.SetUint(uint64(rand.Uint32()))
 	}
 
@@ -59,11 +59,11 @@ func newFactoryFiller() *Filler {
 	funcs[reflect.Uint32] = funcs[reflect.Uint]
 	funcs[reflect.Uint64] = funcs[reflect.Uint]
 
-	funcs[reflect.String] = func(field *fieldData, tagValue string) {
+	funcs[reflect.String] = func(field *fieldData) {
 		field.Value.SetString(randomString())
 	}
 
-	funcs[reflect.Slice] = func(field *fieldData, tagValue string) {
+	funcs[reflect.Slice] = func(field *fieldData) {
 		if field.Value.Type().Elem().Kind() == reflect.Uint8 {
 			if field.Value.Bytes() != nil {
 				return
@@ -73,8 +73,8 @@ func newFactoryFiller() *Filler {
 		}
 	}
 
-	funcs[reflect.Struct] = func(field *fieldData, tagValue string) {
-		fields := getDefaultFiller().getFieldsFromValue(field.Value)
+	funcs[reflect.Struct] = func(field *fieldData) {
+		fields := getDefaultFiller().getFieldsFromValue(field.Value, nil)
 		getDefaultFiller().setDefaultValues(fields)
 	}
 

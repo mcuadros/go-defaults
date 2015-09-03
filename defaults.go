@@ -33,13 +33,13 @@ func getDefaultFiller() *Filler {
 
 func newDefaultFiller() *Filler {
 	funcs := make(map[reflect.Kind]fillerFunc, 0)
-	funcs[reflect.Bool] = func(field *fieldData, tagValue string) {
-		value, _ := strconv.ParseBool(tagValue)
+	funcs[reflect.Bool] = func(field *fieldData) {
+		value, _ := strconv.ParseBool(field.TagValue)
 		field.Value.SetBool(value)
 	}
 
-	funcs[reflect.Int] = func(field *fieldData, tagValue string) {
-		value, _ := strconv.ParseInt(tagValue, 10, 64)
+	funcs[reflect.Int] = func(field *fieldData) {
+		value, _ := strconv.ParseInt(field.TagValue, 10, 64)
 		field.Value.SetInt(value)
 	}
 
@@ -48,15 +48,15 @@ func newDefaultFiller() *Filler {
 	funcs[reflect.Int32] = funcs[reflect.Int]
 	funcs[reflect.Int64] = funcs[reflect.Int]
 
-	funcs[reflect.Float32] = func(field *fieldData, tagValue string) {
-		value, _ := strconv.ParseFloat(tagValue, 64)
+	funcs[reflect.Float32] = func(field *fieldData) {
+		value, _ := strconv.ParseFloat(field.TagValue, 64)
 		field.Value.SetFloat(value)
 	}
 
 	funcs[reflect.Float64] = funcs[reflect.Float32]
 
-	funcs[reflect.Uint] = func(field *fieldData, tagValue string) {
-		value, _ := strconv.ParseUint(tagValue, 10, 64)
+	funcs[reflect.Uint] = func(field *fieldData) {
+		value, _ := strconv.ParseUint(field.TagValue, 10, 64)
 		field.Value.SetUint(value)
 	}
 
@@ -65,22 +65,22 @@ func newDefaultFiller() *Filler {
 	funcs[reflect.Uint32] = funcs[reflect.Uint]
 	funcs[reflect.Uint64] = funcs[reflect.Uint]
 
-	funcs[reflect.String] = func(field *fieldData, tagValue string) {
-		field.Value.SetString(tagValue)
+	funcs[reflect.String] = func(field *fieldData) {
+		field.Value.SetString(field.TagValue)
 	}
 
-	funcs[reflect.Slice] = func(field *fieldData, tagValue string) {
+	funcs[reflect.Slice] = func(field *fieldData) {
 		if field.Value.Type().Elem().Kind() == reflect.Uint8 {
 			if field.Value.Bytes() != nil {
 				return
 			}
 
-			field.Value.SetBytes([]byte(tagValue))
+			field.Value.SetBytes([]byte(field.TagValue))
 		}
 	}
 
-	funcs[reflect.Struct] = func(field *fieldData, tagValue string) {
-		fields := getDefaultFiller().getFieldsFromValue(field.Value)
+	funcs[reflect.Struct] = func(field *fieldData) {
+		fields := getDefaultFiller().getFieldsFromValue(field.Value, nil)
 		getDefaultFiller().setDefaultValues(fields)
 	}
 
