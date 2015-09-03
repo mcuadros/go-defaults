@@ -5,21 +5,21 @@ import (
 	"reflect"
 )
 
-type fieldData struct {
+type FieldData struct {
 	Field    reflect.StructField
 	Value    reflect.Value
 	TagValue string
-	Parent   *fieldData
+	Parent   *FieldData
 }
 
-type fillerFunc func(field *fieldData)
+type FillerFunc func(field *FieldData)
 
 // Filler contains all the functions to fill any struct field with any type
 // allowing to define function by Kind, Type of field name
 type Filler struct {
-	FuncByName map[string]fillerFunc
-	FuncByType map[TypeHash]fillerFunc
-	FuncByKind map[reflect.Kind]fillerFunc
+	FuncByName map[string]FillerFunc
+	FuncByType map[TypeHash]FillerFunc
+	FuncByKind map[reflect.Kind]FillerFunc
 	Tag        string
 }
 
@@ -27,26 +27,26 @@ type Filler struct {
 // values
 func (f *Filler) Fill(variable interface{}) {
 	fields := f.getFields(variable)
-	f.setDefaultValues(fields)
+	f.SetDefaultValues(fields)
 }
 
-func (f *Filler) getFields(variable interface{}) []*fieldData {
+func (f *Filler) getFields(variable interface{}) []*FieldData {
 	valueObject := reflect.ValueOf(variable).Elem()
 
-	return f.getFieldsFromValue(valueObject, nil)
+	return f.GetFieldsFromValue(valueObject, nil)
 }
 
-func (f *Filler) getFieldsFromValue(valueObject reflect.Value, parent *fieldData) []*fieldData {
+func (f *Filler) GetFieldsFromValue(valueObject reflect.Value, parent *FieldData) []*FieldData {
 	typeObject := valueObject.Type()
 
 	count := valueObject.NumField()
-	var results []*fieldData
+	var results []*FieldData
 	for i := 0; i < count; i++ {
 		value := valueObject.Field(i)
 		field := typeObject.Field(i)
 
 		if value.CanSet() {
-			results = append(results, &fieldData{
+			results = append(results, &FieldData{
 				Value:    value,
 				Field:    field,
 				TagValue: field.Tag.Get(f.Tag),
@@ -58,15 +58,15 @@ func (f *Filler) getFieldsFromValue(valueObject reflect.Value, parent *fieldData
 	return results
 }
 
-func (f *Filler) setDefaultValues(fields []*fieldData) {
+func (f *Filler) SetDefaultValues(fields []*FieldData) {
 	for _, field := range fields {
 		if f.isEmpty(field) {
-			f.setDefaultValue(field)
+			f.SetDefaultValue(field)
 		}
 	}
 }
 
-func (f *Filler) isEmpty(field *fieldData) bool {
+func (f *Filler) isEmpty(field *FieldData) bool {
 	switch field.Value.Kind() {
 	case reflect.Bool:
 		if field.Value.Bool() != false {
@@ -97,8 +97,8 @@ func (f *Filler) isEmpty(field *fieldData) bool {
 	return true
 }
 
-func (f *Filler) setDefaultValue(field *fieldData) {
-	getters := []func(field *fieldData) fillerFunc{
+func (f *Filler) SetDefaultValue(field *FieldData) {
+	getters := []func(field *FieldData) FillerFunc{
 		f.getFunctionByName,
 		f.getFunctionByType,
 		f.getFunctionByKind,
@@ -115,7 +115,7 @@ func (f *Filler) setDefaultValue(field *fieldData) {
 	return
 }
 
-func (f *Filler) getFunctionByName(field *fieldData) fillerFunc {
+func (f *Filler) getFunctionByName(field *FieldData) FillerFunc {
 	if f, ok := f.FuncByName[field.Field.Name]; ok == true {
 		return f
 	}
@@ -123,7 +123,7 @@ func (f *Filler) getFunctionByName(field *fieldData) fillerFunc {
 	return nil
 }
 
-func (f *Filler) getFunctionByType(field *fieldData) fillerFunc {
+func (f *Filler) getFunctionByType(field *FieldData) FillerFunc {
 	if f, ok := f.FuncByType[GetTypeHash(field.Field.Type)]; ok == true {
 		return f
 	}
@@ -131,7 +131,7 @@ func (f *Filler) getFunctionByType(field *fieldData) fillerFunc {
 	return nil
 }
 
-func (f *Filler) getFunctionByKind(field *fieldData) fillerFunc {
+func (f *Filler) getFunctionByKind(field *FieldData) FillerFunc {
 	if f, ok := f.FuncByKind[field.Field.Type.Kind()]; ok == true {
 		return f
 	}

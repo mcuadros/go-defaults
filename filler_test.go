@@ -18,13 +18,13 @@ func (s *FillerSuite) TestFuncByNameIsEmpty(c *C) {
 	calledB := false
 
 	f := &Filler{
-		FuncByName: map[string]fillerFunc{
-			"Foo": func(field *fieldData) {
+		FuncByName: map[string]FillerFunc{
+			"Foo": func(field *FieldData) {
 				calledA = true
 			},
 		},
-		FuncByKind: map[reflect.Kind]fillerFunc{
-			reflect.Int: func(field *fieldData) {
+		FuncByKind: map[reflect.Kind]FillerFunc{
+			reflect.Int: func(field *FieldData) {
 				calledB = true
 			},
 		},
@@ -41,13 +41,13 @@ func (s *FillerSuite) TestFuncByTypeIsEmpty(c *C) {
 
 	t := GetTypeHash(reflect.TypeOf(new(FixtureTypeInt)))
 	f := &Filler{
-		FuncByType: map[TypeHash]fillerFunc{
-			t: func(field *fieldData) {
+		FuncByType: map[TypeHash]FillerFunc{
+			t: func(field *FieldData) {
 				calledA = true
 			},
 		},
-		FuncByKind: map[reflect.Kind]fillerFunc{
-			reflect.Int: func(field *fieldData) {
+		FuncByKind: map[reflect.Kind]FillerFunc{
+			reflect.Int: func(field *FieldData) {
 				calledB = true
 			},
 		},
@@ -60,8 +60,8 @@ func (s *FillerSuite) TestFuncByTypeIsEmpty(c *C) {
 
 func (s *FillerSuite) TestFuncByKindIsNotEmpty(c *C) {
 	called := false
-	f := &Filler{FuncByKind: map[reflect.Kind]fillerFunc{
-		reflect.Int: func(field *fieldData) {
+	f := &Filler{FuncByKind: map[reflect.Kind]FillerFunc{
+		reflect.Int: func(field *FieldData) {
 			called = true
 		},
 	}}
@@ -76,8 +76,8 @@ func (s *FillerSuite) TestFuncByKindSlice(c *C) {
 
 func (s *FillerSuite) TestFuncByKindTag(c *C) {
 	var called string
-	f := &Filler{Tag: "foo", FuncByKind: map[reflect.Kind]fillerFunc{
-		reflect.Int: func(field *fieldData) {
+	f := &Filler{Tag: "foo", FuncByKind: map[reflect.Kind]FillerFunc{
+		reflect.Int: func(field *FieldData) {
 			called = field.TagValue
 		},
 	}}
@@ -90,8 +90,8 @@ func (s *FillerSuite) TestFuncByKindTag(c *C) {
 
 func (s *FillerSuite) TestFuncByKindIsEmpty(c *C) {
 	called := false
-	f := &Filler{FuncByKind: map[reflect.Kind]fillerFunc{
-		reflect.Int: func(field *fieldData) {
+	f := &Filler{FuncByKind: map[reflect.Kind]FillerFunc{
+		reflect.Int: func(field *FieldData) {
 			called = true
 		},
 	}}

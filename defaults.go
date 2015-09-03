@@ -32,13 +32,13 @@ func getDefaultFiller() *Filler {
 }
 
 func newDefaultFiller() *Filler {
-	funcs := make(map[reflect.Kind]fillerFunc, 0)
-	funcs[reflect.Bool] = func(field *fieldData) {
+	funcs := make(map[reflect.Kind]FillerFunc, 0)
+	funcs[reflect.Bool] = func(field *FieldData) {
 		value, _ := strconv.ParseBool(field.TagValue)
 		field.Value.SetBool(value)
 	}
 
-	funcs[reflect.Int] = func(field *fieldData) {
+	funcs[reflect.Int] = func(field *FieldData) {
 		value, _ := strconv.ParseInt(field.TagValue, 10, 64)
 		field.Value.SetInt(value)
 	}
@@ -48,14 +48,14 @@ func newDefaultFiller() *Filler {
 	funcs[reflect.Int32] = funcs[reflect.Int]
 	funcs[reflect.Int64] = funcs[reflect.Int]
 
-	funcs[reflect.Float32] = func(field *fieldData) {
+	funcs[reflect.Float32] = func(field *FieldData) {
 		value, _ := strconv.ParseFloat(field.TagValue, 64)
 		field.Value.SetFloat(value)
 	}
 
 	funcs[reflect.Float64] = funcs[reflect.Float32]
 
-	funcs[reflect.Uint] = func(field *fieldData) {
+	funcs[reflect.Uint] = func(field *FieldData) {
 		value, _ := strconv.ParseUint(field.TagValue, 10, 64)
 		field.Value.SetUint(value)
 	}
@@ -65,11 +65,11 @@ func newDefaultFiller() *Filler {
 	funcs[reflect.Uint32] = funcs[reflect.Uint]
 	funcs[reflect.Uint64] = funcs[reflect.Uint]
 
-	funcs[reflect.String] = func(field *fieldData) {
+	funcs[reflect.String] = func(field *FieldData) {
 		field.Value.SetString(field.TagValue)
 	}
 
-	funcs[reflect.Slice] = func(field *fieldData) {
+	funcs[reflect.Slice] = func(field *FieldData) {
 		if field.Value.Type().Elem().Kind() == reflect.Uint8 {
 			if field.Value.Bytes() != nil {
 				return
@@ -79,9 +79,9 @@ func newDefaultFiller() *Filler {
 		}
 	}
 
-	funcs[reflect.Struct] = func(field *fieldData) {
-		fields := getDefaultFiller().getFieldsFromValue(field.Value, nil)
-		getDefaultFiller().setDefaultValues(fields)
+	funcs[reflect.Struct] = func(field *FieldData) {
+		fields := getDefaultFiller().GetFieldsFromValue(field.Value, nil)
+		getDefaultFiller().SetDefaultValues(fields)
 	}
 
 	return &Filler{FuncByKind: funcs, Tag: "default"}

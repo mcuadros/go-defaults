@@ -25,9 +25,9 @@ func getFactoryFiller() *Filler {
 func newFactoryFiller() *Filler {
 	rand.Seed(time.Now().UTC().UnixNano())
 
-	funcs := make(map[reflect.Kind]fillerFunc, 0)
+	funcs := make(map[reflect.Kind]FillerFunc, 0)
 
-	funcs[reflect.Bool] = func(field *fieldData) {
+	funcs[reflect.Bool] = func(field *FieldData) {
 		if rand.Intn(1) == 1 {
 			field.Value.SetBool(true)
 		} else {
@@ -35,7 +35,7 @@ func newFactoryFiller() *Filler {
 		}
 	}
 
-	funcs[reflect.Int] = func(field *fieldData) {
+	funcs[reflect.Int] = func(field *FieldData) {
 		field.Value.SetInt(int64(rand.Int()))
 	}
 
@@ -44,13 +44,13 @@ func newFactoryFiller() *Filler {
 	funcs[reflect.Int32] = funcs[reflect.Int]
 	funcs[reflect.Int64] = funcs[reflect.Int]
 
-	funcs[reflect.Float32] = func(field *fieldData) {
+	funcs[reflect.Float32] = func(field *FieldData) {
 		field.Value.SetFloat(rand.Float64())
 	}
 
 	funcs[reflect.Float64] = funcs[reflect.Float32]
 
-	funcs[reflect.Uint] = func(field *fieldData) {
+	funcs[reflect.Uint] = func(field *FieldData) {
 		field.Value.SetUint(uint64(rand.Uint32()))
 	}
 
@@ -59,11 +59,11 @@ func newFactoryFiller() *Filler {
 	funcs[reflect.Uint32] = funcs[reflect.Uint]
 	funcs[reflect.Uint64] = funcs[reflect.Uint]
 
-	funcs[reflect.String] = func(field *fieldData) {
+	funcs[reflect.String] = func(field *FieldData) {
 		field.Value.SetString(randomString())
 	}
 
-	funcs[reflect.Slice] = func(field *fieldData) {
+	funcs[reflect.Slice] = func(field *FieldData) {
 		if field.Value.Type().Elem().Kind() == reflect.Uint8 {
 			if field.Value.Bytes() != nil {
 				return
@@ -73,9 +73,9 @@ func newFactoryFiller() *Filler {
 		}
 	}
 
-	funcs[reflect.Struct] = func(field *fieldData) {
-		fields := getDefaultFiller().getFieldsFromValue(field.Value, nil)
-		getDefaultFiller().setDefaultValues(fields)
+	funcs[reflect.Struct] = func(field *FieldData) {
+		fields := getFactoryFiller().GetFieldsFromValue(field.Value, nil)
+		getFactoryFiller().SetDefaultValues(fields)
 	}
 
 	return &Filler{FuncByKind: funcs, Tag: "factory"}
