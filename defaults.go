@@ -3,6 +3,7 @@ package defaults
 import (
 	"reflect"
 	"strconv"
+	"time"
 )
 
 // Applies the default values to the struct object, the struct type must have
@@ -13,6 +14,7 @@ import (
 //         Foo bool   `default:"true"`
 //         Bar string `default:"33"`
 //         Qux int8
+//         Dur time.Duration `default:"2m3s"`
 //     }
 //
 //      foo := &ExampleBasic{}
@@ -46,7 +48,15 @@ func newDefaultFiller() *Filler {
 	funcs[reflect.Int8] = funcs[reflect.Int]
 	funcs[reflect.Int16] = funcs[reflect.Int]
 	funcs[reflect.Int32] = funcs[reflect.Int]
-	funcs[reflect.Int64] = funcs[reflect.Int]
+	funcs[reflect.Int64] = func(field *FieldData) {
+		if field.Field.Type == reflect.TypeOf(time.Second) {
+			value, _ := time.ParseDuration(field.TagValue)
+			field.Value.Set(reflect.ValueOf(value))
+		} else {
+			value, _ := strconv.ParseInt(field.TagValue, 10, 64)
+			field.Value.SetInt(value)
+		}
+	}
 
 	funcs[reflect.Float32] = func(field *FieldData) {
 		value, _ := strconv.ParseFloat(field.TagValue, 64)
