@@ -21,6 +21,7 @@ A basic example:
 import (
     "fmt"
     "github.com/mcuadros/go-defaults"
+    "time"
 )
 
 type ExampleBasic struct {

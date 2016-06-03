@@ -45,6 +45,7 @@ type ExampleBasic struct {
 	}
 	Duration time.Duration `default:"1s"`
 	Children []Child
+	Second   time.Duration `default:"1s"`
 }
 
 func (s *DefaultsSuite) TestSetDefaultsBasic(c *C) {
@@ -84,6 +85,7 @@ func (s *DefaultsSuite) assertTypes(c *C, foo *ExampleBasic) {
 	c.Assert(foo.Struct.Bool, Equals, true)
 	c.Assert(foo.Duration, Equals, time.Second)
 	c.Assert(foo.Children, IsNil)
+	c.Assert(foo.Second, Equals, time.Second)
 }
 
 func (s *DefaultsSuite) TestSetDefaultsWithValues(c *C) {
