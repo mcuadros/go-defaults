@@ -2,6 +2,7 @@ package defaults
 
 import (
 	"testing"
+	"time"
 
 	. "gopkg.in/check.v1"
 )
@@ -33,6 +34,7 @@ type ExampleBasic struct {
 		Bool    bool `default:"true"`
 		Integer int  `default:"33"`
 	}
+	Second time.Duration `default:"1s"`
 }
 
 func (s *DefaultsSuite) TestSetDefaultsBasic(c *C) {
@@ -70,6 +72,7 @@ func (s *DefaultsSuite) assertTypes(c *C, foo *ExampleBasic) {
 	c.Assert(foo.Float32, Equals, float32(3.2))
 	c.Assert(foo.Float64, Equals, 6.4)
 	c.Assert(foo.Struct.Bool, Equals, true)
+	c.Assert(foo.Second, Equals, time.Second)
 }
 
 func (s *DefaultsSuite) TestSetDefaultsWithValues(c *C) {

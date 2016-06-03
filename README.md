@@ -21,12 +21,14 @@ A basic example:
 import (
     "fmt"
     "github.com/mcuadros/go-defaults"
+    "time"
 )
 
 type ExampleBasic struct {
     Foo bool   `default:"true"` //<-- StructTag with a default key
     Bar string `default:"33"`
     Qux int8
+    Dur time.Duration `default:"1m"`
 }
 
 func NewExampleBasic() *ExampleBasic {
@@ -42,6 +44,7 @@ test := NewExampleBasic()
 fmt.Println(test.Foo) //Prints: true
 fmt.Println(test.Bar) //Prints: 33
 fmt.Println(test.Qux) //Prints:
+fmt.Println(test.Dur) //Prints: 1m0s
 
 ```
 
