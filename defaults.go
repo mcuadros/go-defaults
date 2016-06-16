@@ -3,6 +3,7 @@ package defaults
 import (
 	"reflect"
 	"strconv"
+	"time"
 )
 
 // Applies the default values to the struct object, the struct type must have
@@ -84,5 +85,11 @@ func newDefaultFiller() *Filler {
 		getDefaultFiller().SetDefaultValues(fields)
 	}
 
-	return &Filler{FuncByKind: funcs, Tag: "default"}
+	types := make(map[TypeHash]FillerFunc, 1)
+	types["time.Duration"] = func(field *FieldData) {
+		d, _ := time.ParseDuration(field.TagValue)
+		field.Value.Set(reflect.ValueOf(d))
+	}
+
+	return &Filler{FuncByKind: funcs, FuncByType: types, Tag: "default"}
 }
