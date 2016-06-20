@@ -14,6 +14,15 @@ type DefaultsSuite struct{}
 
 var _ = Suite(&DefaultsSuite{})
 
+type Parent struct {
+	Children []Child
+}
+
+type Child struct {
+	Name string
+	Age  int `default:"10"`
+}
+
 type ExampleBasic struct {
 	Bool       bool    `default:"true"`
 	Integer    int     `default:"33"`
@@ -35,6 +44,7 @@ type ExampleBasic struct {
 		Integer int  `default:"33"`
 	}
 	Duration time.Duration `default:"1s"`
+	Children []Child
 }
 
 func (s *DefaultsSuite) TestSetDefaultsBasic(c *C) {
@@ -73,6 +83,7 @@ func (s *DefaultsSuite) assertTypes(c *C, foo *ExampleBasic) {
 	c.Assert(foo.Float64, Equals, 6.4)
 	c.Assert(foo.Struct.Bool, Equals, true)
 	c.Assert(foo.Duration, Equals, time.Second)
+	c.Assert(foo.Children, IsNil)
 }
 
 func (s *DefaultsSuite) TestSetDefaultsWithValues(c *C) {
@@ -82,6 +93,7 @@ func (s *DefaultsSuite) TestSetDefaultsWithValues(c *C) {
 		Float32:  9.9,
 		String:   "bar",
 		Bytes:    []byte("foo"),
+		Children: []Child{{Name: "alice"}, {Name: "bob", Age: 2}},
 	}
 
 	SetDefaults(foo)
@@ -91,6 +103,8 @@ func (s *DefaultsSuite) TestSetDefaultsWithValues(c *C) {
 	c.Assert(foo.Float32, Equals, float32(9.9))
 	c.Assert(foo.String, Equals, "bar")
 	c.Assert(string(foo.Bytes), Equals, "foo")
+	c.Assert(foo.Children[0].Age, Equals, 10)
+	c.Assert(foo.Children[1].Age, Equals, 2)
 }
 
 func (s *DefaultsSuite) BenchmarkLogic(c *C) {

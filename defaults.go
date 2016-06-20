@@ -71,12 +71,19 @@ func newDefaultFiller() *Filler {
 	}
 
 	funcs[reflect.Slice] = func(field *FieldData) {
-		if field.Value.Type().Elem().Kind() == reflect.Uint8 {
+		k := field.Value.Type().Elem().Kind()
+		switch k {
+		case reflect.Uint8:
 			if field.Value.Bytes() != nil {
 				return
 			}
-
 			field.Value.SetBytes([]byte(field.TagValue))
+		case reflect.Struct:
+			count := field.Value.Len()
+			for i := 0; i < count; i++ {
+				fields := getDefaultFiller().GetFieldsFromValue(field.Value.Index(i), nil)
+				getDefaultFiller().SetDefaultValues(fields)
+			}
 		}
 	}
 
