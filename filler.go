@@ -85,8 +85,13 @@ func (f *Filler) isEmpty(field *FieldData) bool {
 			return false
 		}
 	case reflect.Slice:
-		if field.Value.Len() != 0 {
-			return false
+		switch field.Value.Type().Elem().Kind() {
+		case reflect.Struct:
+			// always assume the structs in the slice is empty and can be filled
+			// the actually struct filling logic should take care of the rest
+			return true
+		default:
+			return field.Value.Len() == 0
 		}
 	case reflect.String:
 		if field.Value.String() != "" {
