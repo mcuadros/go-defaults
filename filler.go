@@ -69,21 +69,13 @@ func (f *Filler) SetDefaultValues(fields []*FieldData) {
 func (f *Filler) isEmpty(field *FieldData) bool {
 	switch field.Value.Kind() {
 	case reflect.Bool:
-		if field.Value.Bool() != false {
-			return false
-		}
+		return !field.Value.Bool()
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		if field.Value.Int() != 0 {
-			return false
-		}
+		return field.Value.Int() == 0
 	case reflect.Float32, reflect.Float64:
-		if field.Value.Float() != .0 {
-			return false
-		}
+		return field.Value.Float() == .0
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		if field.Value.Uint() != 0 {
-			return false
-		}
+		return field.Value.Uint() == 0
 	case reflect.Slice:
 		switch field.Value.Type().Elem().Kind() {
 		case reflect.Struct:
@@ -94,11 +86,8 @@ func (f *Filler) isEmpty(field *FieldData) bool {
 			return field.Value.Len() == 0
 		}
 	case reflect.String:
-		if field.Value.String() != "" {
-			return false
-		}
+		return field.Value.String() == ""
 	}
-
 	return true
 }
 
