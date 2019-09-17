@@ -43,9 +43,13 @@ type ExampleBasic struct {
 		Bool    bool `default:"true"`
 		Integer int  `default:"33"`
 	}
-	Duration time.Duration `default:"1s"`
-	Children []Child
-	Second   time.Duration `default:"1s"`
+	Duration         time.Duration `default:"1s"`
+	Children         []Child
+	Second           time.Duration `default:"1s"`
+	StringSlice      []string      `default:"[1,2,3,4]"`
+	IntSlice         []int         `default:"[1,2,3,4]"`
+	IntSliceSlice    [][]int       `default:"[[1],[2],[3],[4]]"`
+	StringSliceSlice [][]string    `default:"[[1],[]]"`
 }
 
 func (s *DefaultsSuite) TestSetDefaultsBasic(c *C) {
@@ -86,6 +90,10 @@ func (s *DefaultsSuite) assertTypes(c *C, foo *ExampleBasic) {
 	c.Assert(foo.Duration, Equals, time.Second)
 	c.Assert(foo.Children, IsNil)
 	c.Assert(foo.Second, Equals, time.Second)
+	c.Assert(foo.StringSlice, DeepEquals, []string{"1", "2", "3", "4"})
+	c.Assert(foo.IntSlice, DeepEquals, []int{1, 2, 3, 4})
+	c.Assert(foo.IntSliceSlice, DeepEquals, [][]int{[]int{1}, []int{2}, []int{3}, []int{4}})
+	c.Assert(foo.StringSliceSlice, DeepEquals, [][]string{[]string{"1"}, []string{}})
 }
 
 func (s *DefaultsSuite) TestSetDefaultsWithValues(c *C) {

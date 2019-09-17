@@ -2,7 +2,9 @@ package defaults
 
 import (
 	"reflect"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -79,6 +81,17 @@ func newDefaultFiller() *Filler {
 		field.Value.SetString(field.TagValue)
 	}
 
+	funcs[reflect.Struct] = func(field *FieldData) {
+		fields := getDefaultFiller().GetFieldsFromValue(field.Value, nil)
+		getDefaultFiller().SetDefaultValues(fields)
+	}
+
+	types := make(map[TypeHash]FillerFunc, 1)
+	types["time.Duration"] = func(field *FieldData) {
+		d, _ := time.ParseDuration(field.TagValue)
+		field.Value.Set(reflect.ValueOf(d))
+	}
+
 	funcs[reflect.Slice] = func(field *FieldData) {
 		k := field.Value.Type().Elem().Kind()
 		switch k {
@@ -93,18 +106,31 @@ func newDefaultFiller() *Filler {
 				fields := getDefaultFiller().GetFieldsFromValue(field.Value.Index(i), nil)
 				getDefaultFiller().SetDefaultValues(fields)
 			}
+		default:
+			//处理形如 [1,2,3,4]
+			reg := regexp.MustCompile(`^\[(.*)\]$`)
+			matchs := reg.FindStringSubmatch(field.TagValue)
+			if len(matchs) != 2 {
+				return
+			}
+			if matchs[1] == "" {
+				field.Value.Set(reflect.MakeSlice(field.Value.Type(), 0, 0))
+			} else {
+				defaultValue := strings.Split(matchs[1], ",")
+				result := reflect.MakeSlice(field.Value.Type(), len(defaultValue), len(defaultValue))
+				for i := 0; i < len(defaultValue); i++ {
+					itemValue := result.Index(i)
+					item := &FieldData{
+						Value:    itemValue,
+						Field:    reflect.StructField{},
+						TagValue: defaultValue[i],
+						Parent:   nil,
+					}
+					funcs[k](item)
+				}
+				field.Value.Set(result)
+			}
 		}
-	}
-
-	funcs[reflect.Struct] = func(field *FieldData) {
-		fields := getDefaultFiller().GetFieldsFromValue(field.Value, nil)
-		getDefaultFiller().SetDefaultValues(fields)
-	}
-
-	types := make(map[TypeHash]FillerFunc, 1)
-	types["time.Duration"] = func(field *FieldData) {
-		d, _ := time.ParseDuration(field.TagValue)
-		field.Value.Set(reflect.ValueOf(d))
 	}
 
 	return &Filler{FuncByKind: funcs, FuncByType: types, Tag: "default"}
