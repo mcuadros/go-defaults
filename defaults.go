@@ -78,7 +78,8 @@ func newDefaultFiller() *Filler {
 	funcs[reflect.Uint64] = funcs[reflect.Uint]
 
 	funcs[reflect.String] = func(field *FieldData) {
-		field.Value.SetString(field.TagValue)
+		tagValue := parseDateTimeString(field.TagValue)
+		field.Value.SetString(tagValue)
 	}
 
 	funcs[reflect.Struct] = func(field *FieldData) {
@@ -134,4 +135,41 @@ func newDefaultFiller() *Filler {
 	}
 
 	return &Filler{FuncByKind: funcs, FuncByType: types, Tag: "default"}
+}
+
+func parseDateTimeString(data string) string {
+
+	pattern := regexp.MustCompile(`\{\{(\w+\:(?:-|)\d*,(?:-|)\d*,(?:-|)\d*)\}\}`)
+	matches := pattern.FindAllStringSubmatch(data, -1) // matches is [][]string
+	for _, match := range matches {
+
+		tags := strings.Split(match[1], ":")
+		if len(tags) == 2 {
+
+			valueStrings := strings.Split(tags[1], ",")
+			if len(valueStrings) == 3 {
+				var values [3]int
+				for key, valueString := range valueStrings {
+					num, _ := strconv.ParseInt(valueString, 10, 64)
+					values[key] = int(num)
+				}
+
+				switch tags[0] {
+
+				case "date":
+					str := time.Now().AddDate(values[0], values[1], values[2]).Format("2006-01-02")
+					data = strings.Replace(data, match[0], str, -1)
+					break
+				case "time":
+					str := time.Now().Add((time.Duration(values[0]) * time.Hour) +
+						(time.Duration(values[1]) * time.Minute) +
+						(time.Duration(values[2]) * time.Second)).Format("15:04:05")
+					data = strings.Replace(data, match[0], str, -1)
+					break
+				}
+			}
+		}
+
+	}
+	return data
 }
