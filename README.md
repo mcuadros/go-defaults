@@ -9,7 +9,7 @@ Installation
 The recommended way to install go-defaults
 
 ```
-go get gopkg.in/mcuadros/go-defaults.v1
+go get github.com/mcuadros/go-defaults
 ```
 
 Examples
