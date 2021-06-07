@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -25,12 +26,15 @@ func SetDefaults(variable interface{}) {
 	getDefaultFiller().Fill(variable)
 }
 
-var defaultFiller *Filler = nil
+var (
+	defaultFillerOnce sync.Once
+	defaultFiller     *Filler = nil
+)
 
 func getDefaultFiller() *Filler {
-	if defaultFiller == nil {
+	defaultFillerOnce.Do(func() {
 		defaultFiller = newDefaultFiller()
-	}
+	})
 
 	return defaultFiller
 }
