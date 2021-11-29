@@ -4,11 +4,20 @@ import (
 	"testing"
 	"time"
 
+	"bou.ke/monkey"
 	. "gopkg.in/check.v1"
 )
 
 // Hook up gocheck into the "go test" runner.
-func Test(t *testing.T) { TestingT(t) }
+
+func Test(t *testing.T) {
+	monkey.Patch(time.Now, func() time.Time {
+		t, _ := time.Parse("2006-01-02 15:04:05", "2020-06-10 12:00:00")
+		return t
+	})
+
+	TestingT(t)
+}
 
 type DefaultsSuite struct{}
 
@@ -50,6 +59,8 @@ type ExampleBasic struct {
 	IntSlice         []int         `default:"[1,2,3,4]"`
 	IntSliceSlice    [][]int       `default:"[[1],[2],[3],[4]]"`
 	StringSliceSlice [][]string    `default:"[[1],[]]"`
+
+	DateTime string `default:"{{date:1,-10,0}} {{time:1,-5,10}}"`
 }
 
 func (s *DefaultsSuite) TestSetDefaultsBasic(c *C) {
@@ -94,6 +105,7 @@ func (s *DefaultsSuite) assertTypes(c *C, foo *ExampleBasic) {
 	c.Assert(foo.IntSlice, DeepEquals, []int{1, 2, 3, 4})
 	c.Assert(foo.IntSliceSlice, DeepEquals, [][]int{[]int{1}, []int{2}, []int{3}, []int{4}})
 	c.Assert(foo.StringSliceSlice, DeepEquals, [][]string{[]string{"1"}, []string{}})
+	c.Assert(foo.DateTime, Equals, "2020-08-10 12:55:10")
 }
 
 func (s *DefaultsSuite) TestSetDefaultsWithValues(c *C) {
