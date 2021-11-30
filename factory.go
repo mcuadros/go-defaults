@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"math/rand"
 	"reflect"
+	"sync"
 	"time"
 )
 
@@ -12,12 +13,15 @@ func Factory(variable interface{}) {
 	getFactoryFiller().Fill(variable)
 }
 
-var factoryFiller *Filler = nil
+var (
+	factoryFillerOnce sync.Once
+	factoryFiller     *Filler = nil
+)
 
 func getFactoryFiller() *Filler {
-	if factoryFiller == nil {
+	factoryFillerOnce.Do(func() {
 		factoryFiller = newFactoryFiller()
-	}
+	})
 
 	return factoryFiller
 }
