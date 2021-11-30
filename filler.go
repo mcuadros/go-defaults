@@ -96,6 +96,7 @@ func (f *Filler) SetDefaultValue(field *FieldData) {
 		f.getFunctionByName,
 		f.getFunctionByType,
 		f.getFunctionByKind,
+		f.getFunctionByInterface,
 	}
 
 	for _, getter := range getters {
@@ -131,6 +132,28 @@ func (f *Filler) getFunctionByKind(field *FieldData) FillerFunc {
 	}
 
 	return nil
+}
+
+func (f *Filler) getFunctionByInterface(field *FieldData) FillerFunc {
+	if !field.Field.Type.Implements(defaultsType) {
+		return nil
+	}
+	return func(field *FieldData) {
+		if !field.Value.CanInterface() {
+			return
+		}
+		asDefaults, ok := field.Value.Interface().(Defaults)
+		if !ok {
+			return
+		}
+		field.Value.Set(reflect.ValueOf(asDefaults.Defaults(field.TagValue)))
+	}
+}
+
+var defaultsType = reflect.TypeOf((*Defaults)(nil)).Elem()
+
+type Defaults interface {
+	Defaults(tagValue string) interface{}
 }
 
 // TypeHash is a string representing a reflect.Type following the next pattern:
