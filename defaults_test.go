@@ -52,13 +52,14 @@ type ExampleBasic struct {
 		Bool    bool `default:"true"`
 		Integer int  `default:"33"`
 	}
-	Duration         time.Duration `default:"1s"`
-	Children         []Child
-	Second           time.Duration `default:"1s"`
-	StringSlice      []string      `default:"[1,2,3,4]"`
-	IntSlice         []int         `default:"[1,2,3,4]"`
-	IntSliceSlice    [][]int       `default:"[[1],[2],[3],[4]]"`
-	StringSliceSlice [][]string    `default:"[[1],[]]"`
+	Duration          time.Duration `default:"1s"`
+	Children          []Child
+	Second            time.Duration `default:"1s"`
+	Integer64Duration time.Duration `default:"1000000000"`
+	StringSlice       []string      `default:"[1,2,3,4]"`
+	IntSlice          []int         `default:"[1,2,3,4]"`
+	IntSliceSlice     [][]int       `default:"[[1],[2],[3],[4]]"`
+	StringSliceSlice  [][]string    `default:"[[1],[]]"`
 
 	DateTime string `default:"{{date:1,-10,0}} {{time:1,-5,10}}"`
 }
@@ -101,6 +102,7 @@ func (s *DefaultsSuite) assertTypes(c *C, foo *ExampleBasic) {
 	c.Assert(foo.Duration, Equals, time.Second)
 	c.Assert(foo.Children, IsNil)
 	c.Assert(foo.Second, Equals, time.Second)
+	c.Assert(foo.Integer64Duration, Equals, time.Second)
 	c.Assert(foo.StringSlice, DeepEquals, []string{"1", "2", "3", "4"})
 	c.Assert(foo.IntSlice, DeepEquals, []int{1, 2, 3, 4})
 	c.Assert(foo.IntSliceSlice, DeepEquals, [][]int{[]int{1}, []int{2}, []int{3}, []int{4}})
