@@ -94,7 +94,11 @@ func newDefaultFiller() *Filler {
 
 	types := make(map[TypeHash]FillerFunc, 1)
 	types["time.Duration"] = func(field *FieldData) {
-		d, _ := time.ParseDuration(field.TagValue)
+		d, err := time.ParseDuration(field.TagValue)
+		if err != nil {
+			v, _ := strconv.ParseInt(field.TagValue, 10, 64)
+			d = time.Duration(v)
+		}
 		field.Value.Set(reflect.ValueOf(d))
 	}
 
