@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -12,25 +13,29 @@ import (
 // the StructTag with name "default" and the directed value.
 //
 // Usage
-//     type ExampleBasic struct {
-//         Foo bool   `default:"true"`
-//         Bar string `default:"33"`
-//         Qux int8
-//         Dur time.Duration `default:"2m3s"`
-//     }
 //
-//      foo := &ExampleBasic{}
-//      SetDefaults(foo)
+//	type ExampleBasic struct {
+//	    Foo bool   `default:"true"`
+//	    Bar string `default:"33"`
+//	    Qux int8
+//	    Dur time.Duration `default:"2m3s"`
+//	}
+//
+//	 foo := &ExampleBasic{}
+//	 SetDefaults(foo)
 func SetDefaults(variable interface{}) {
 	getDefaultFiller().Fill(variable)
 }
 
-var defaultFiller *Filler = nil
+var (
+	defaultFillerOnce sync.Once
+	defaultFiller     *Filler = nil
+)
 
 func getDefaultFiller() *Filler {
-	if defaultFiller == nil {
+	defaultFillerOnce.Do(func() {
 		defaultFiller = newDefaultFiller()
-	}
+	})
 
 	return defaultFiller
 }
