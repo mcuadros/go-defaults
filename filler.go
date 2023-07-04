@@ -82,11 +82,23 @@ func (f *Filler) isEmpty(field *FieldData) bool {
 			// always assume the structs in the slice is empty and can be filled
 			// the actually struct filling logic should take care of the rest
 			return true
+		case reflect.Ptr:
+			switch field.Value.Type().Elem().Elem().Kind() {
+			case reflect.Struct:
+				return true
+			default:
+				return field.Value.Len() == 0
+			}
 		default:
 			return field.Value.Len() == 0
 		}
 	case reflect.String:
 		return field.Value.String() == ""
+	case reflect.Ptr:
+		if field.Value.Type().Elem().Kind() == reflect.Struct {
+			return true
+		}
+		return field.Value.IsNil()
 	}
 	return true
 }
@@ -105,12 +117,10 @@ func (f *Filler) SetDefaultValue(field *FieldData) {
 			return
 		}
 	}
-
-	return
 }
 
 func (f *Filler) getFunctionByName(field *FieldData) FillerFunc {
-	if f, ok := f.FuncByName[field.Field.Name]; ok == true {
+	if f, ok := f.FuncByName[field.Field.Name]; ok {
 		return f
 	}
 
@@ -118,7 +128,7 @@ func (f *Filler) getFunctionByName(field *FieldData) FillerFunc {
 }
 
 func (f *Filler) getFunctionByType(field *FieldData) FillerFunc {
-	if f, ok := f.FuncByType[GetTypeHash(field.Field.Type)]; ok == true {
+	if f, ok := f.FuncByType[GetTypeHash(field.Field.Type)]; ok {
 		return f
 	}
 
@@ -126,7 +136,7 @@ func (f *Filler) getFunctionByType(field *FieldData) FillerFunc {
 }
 
 func (f *Filler) getFunctionByKind(field *FieldData) FillerFunc {
-	if f, ok := f.FuncByKind[field.Field.Type.Kind()]; ok == true {
+	if f, ok := f.FuncByKind[field.Field.Type.Kind()]; ok {
 		return f
 	}
 
