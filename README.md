@@ -66,6 +66,40 @@ fmt.Println(example.Bar) //Prints: 0
 
 ```
 
+Pointer Set
+-------
+
+Pointer field struct is a tricky usage to avoid covering existed values. 
+
+Take the basic example in the above section and change it slightly:
+```go
+
+type ExamplePointer struct {
+    Foo *bool   `default:"true"` //<-- StructTag with a default key
+    Bar *string `default:"example"`
+    Qux *int    `default:"22"`
+    Oed *int64  `default:"64"`
+}
+
+...
+
+boolZero := false
+stringZero := ""
+intZero := 0
+example := ExamplePointer{
+    Foo: &boolZero,
+    Bar: &stringZero,
+    Qux: &intZero,
+}
+defaults.SetDefaults(example)
+
+fmt.Println(*example.Foo) //Prints: false (zero value `false` for bool but not for bool ptr)
+fmt.Println(*example.Bar) //Prints: "" (print "" which set in advance, not "example" for default)
+fmt.Println(*example.Qux) //Prints: 0 (0 instead of 22)
+fmt.Println(*example.Oed) //Prints: 64 (64, because the ptr addr is nil when SetDefaults)
+
+```
+
 License
 -------
 
