@@ -108,7 +108,7 @@ func newDefaultFiller() *Filler {
 				getDefaultFiller().SetDefaultValues(fields)
 			}
 		default:
-			//处理形如 [1,2,3,4]
+			// handle slice like [1,2,3,4]
 			reg := regexp.MustCompile(`^\[(.*)\]$`)
 			matchs := reg.FindStringSubmatch(field.TagValue)
 			if len(matchs) != 2 {
