@@ -30,6 +30,11 @@ func (f *Filler) Fill(variable interface{}) {
 	f.SetDefaultValues(fields)
 }
 
+func (f *Filler) FillReflect(value reflect.Value) {
+	fields := f.GetFieldsFromValue(value, nil)
+	f.SetDefaultValues(fields)
+}
+
 func (f *Filler) getFields(variable interface{}) []*FieldData {
 	valueObject := reflect.ValueOf(variable).Elem()
 
